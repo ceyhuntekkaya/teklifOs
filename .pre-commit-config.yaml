@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: java-compile
+        name: Java compile
+        entry: bash -c 'cd services/java && ./gradlew compileJava -x test --no-daemon -q'
+        language: system
+        pass_filenames: false
+        files: \.java$

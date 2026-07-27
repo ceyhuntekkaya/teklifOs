@@ -1,0 +1,4 @@
+:80 {
+  reverse_proxy /api/* gateway:8080
+  reverse_proxy localhost:3000
+}

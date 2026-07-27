@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.AutoConfiguration=\
+  tr.teklifos.shared.security.SharedSecurityAutoConfiguration

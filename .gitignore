@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build
+dist/
+build/
+target/
+.next/
+out/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+uv.lock
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & temp
+*.log
+tmp/
+temp/
+
+# Test / coverage
+coverage/
+htmlcov/
+.nyc_output/
+
+# Keys (dev only - never commit real keys)
+**/keys/*.pem
+!**/keys/.gitkeep

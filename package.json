@@ -1,0 +1,17 @@
+{
+  "name": "teklifos",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --filter @teklifos/web dev",
+    "build:web": "pnpm --filter @teklifos/web build",
+    "lint:web": "pnpm --filter @teklifos/web lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yml,yaml}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  }
+}
