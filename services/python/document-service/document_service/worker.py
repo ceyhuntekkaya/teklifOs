@@ -11,6 +11,7 @@ from teklifos_shared.settings import ServiceSettings
 
 from document_service.pipeline.extractors import extract_pdf, extract_xlsx, preview_json
 from document_service.pipeline.file_type import validate_magic, zip_bomb_guard
+from document_service.pipeline.line_items import infer_line_items
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +91,7 @@ class DocumentProcessor:
             return
 
         preview = preview_json(extraction.text, extraction.tables)
+        preview["lineItems"] = infer_line_items(extraction.text, extraction.tables)
         self._publish_stage(
             message_id,
             tenant_id,

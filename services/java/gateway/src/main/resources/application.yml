@@ -38,7 +38,7 @@ spring:
             - id: master-data
               uri: ${MASTER_DATA_SERVICE_URL:http://localhost:8082}
               predicates:
-                - Path=/api/v1/products/**,/api/v1/customers/**,/api/v1/manufacturers/**,/api/v1/imports/**,/api/v1/units/**
+                - Path=/api/v1/products/**,/api/v1/customers/**,/api/v1/manufacturers/**,/api/v1/imports/**,/api/v1/units/**,/api/v1/matching/**
             - id: pricing
               uri: ${PRICING_SERVICE_URL:http://localhost:8083}
               predicates:
@@ -57,8 +57,14 @@ spring:
                 - Path=/api/v1/notifications/**,/api/v1/outbound-messages/**,/api/v1/follow-ups/**,/api/v1/email-templates/**
             - id: mail-ingestion
               uri: ${MAIL_INGESTION_URL:http://localhost:9001}
-            predicates:
+              predicates:
                 - Path=/api/v1/mailboxes/**,/api/v1/inbound/**
+            - id: ai-service
+              uri: ${AI_SERVICE_URL:http://localhost:9004}
+              predicates:
+                - Path=/api/v1/ai/**
+              filters:
+                - RewritePath=/api/v1/ai/(?<segment>.*), /ai/${segment}
             - id: reports
               uri: ${RFQ_SERVICE_URL:http://localhost:8084}
               predicates:

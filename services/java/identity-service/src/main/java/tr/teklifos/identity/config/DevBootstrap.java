@@ -48,6 +48,7 @@ public class DevBootstrap {
             return;
         }
         TenantEntity tenant = new TenantEntity();
+        tenant.setId(UUID.fromString("a1b2c3d4-e5f6-4789-a012-3456789abcde"));
         tenant.setName("Demo Distribütör");
         tenant.setSlug("demo");
         tenantRepository.save(tenant);

@@ -7,7 +7,7 @@
 | 2 | Ana veri + içe aktarma | İskelet |
 | 3 | Fiyatlandırma motoru | İskelet |
 | 4 | Belge / e-posta hattı | Tamamlandı (RFQ upload, saga, document/ocr/mail servisleri, UI) |
-| 5 | AI + eşleştirme | İskelet |
+| 5 | AI + eşleştirme | Katmanlı motor (exact/alias/trigram), ai-service embed+rerank, RFQ MATCHED hattı, harness |
 | 6 | RFQ inceleme UI | Planlandı |
 | 7 | Teklif + onay + PDF | İskelet |
 | 8 | Gönderim + takip | İskelet |

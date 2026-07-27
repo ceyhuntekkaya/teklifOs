@@ -17,15 +17,21 @@ public class ResourceServerSecurityConfig {
 
     private final JwtTenantResolver jwtTenantResolver;
     private final TenantContextFilter tenantContextFilter;
+    private final TeklifosInternalProperties internalProperties;
 
     public ResourceServerSecurityConfig(
-            JwtTenantResolver jwtTenantResolver, TenantContextFilter tenantContextFilter) {
+            JwtTenantResolver jwtTenantResolver,
+            TenantContextFilter tenantContextFilter,
+            TeklifosInternalProperties internalProperties) {
         this.jwtTenantResolver = jwtTenantResolver;
         this.tenantContextFilter = tenantContextFilter;
+        this.internalProperties = internalProperties;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        InternalServiceAuthenticationFilter internalServiceAuthenticationFilter =
+                new InternalServiceAuthenticationFilter(internalProperties);
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwtTenantResolver::authorities);
 
@@ -45,6 +51,8 @@ public class ResourceServerSecurityConfig {
                                         .authenticated())
                 .oauth2ResourceServer(
                         oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(converter)))
+                .addFilterBefore(
+                        internalServiceAuthenticationFilter, BearerTokenAuthenticationFilter.class)
                 .addFilterAfter(tenantContextFilter, BearerTokenAuthenticationFilter.class);
         return http.build();
     }

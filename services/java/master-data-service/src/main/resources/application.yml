@@ -41,3 +41,9 @@ management:
 springdoc:
   api-docs:
     path: /v3/api-docs
+
+teklifos:
+  internal:
+    api-key: ${TEKLIFOS_INTERNAL_API_KEY:dev-internal-key}
+  ai:
+    base-url: ${AI_SERVICE_URL:http://localhost:9004}

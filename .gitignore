@@ -2,34 +2,54 @@
 node_modules/
 .pnpm-store/
 
-# Build
+# Build outputs
 dist/
 build/
 target/
 .next/
 out/
+*.class
+*.tsbuildinfo
 *.jar
-!gradle/wrapper/gradle-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.jar
+
+# Gradle (local cache — do not commit)
+.gradle/
 
 # Python
 .venv/
+venv/
 __pycache__/
 *.py[cod]
+*.egg-info/
+.eggs/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-uv.lock
+.coverage
+htmlcov/
 
-# IDE
+# IDE & editors
 .idea/
 *.iml
 .vscode/
+.fleet/
 *.swp
+*~
 
-# Env & secrets
+# Environment & secrets
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.p12
+*.jks
+**/keys/*
+!**/keys/.gitkeep
+
+# Local dev runtime (scripts/dev-stack.sh)
+.dev-pids/
 
 # OS
 .DS_Store
@@ -37,14 +57,14 @@ Thumbs.db
 
 # Logs & temp
 *.log
+npm-debug.log*
+pnpm-debug.log*
 tmp/
 temp/
 
 # Test / coverage
 coverage/
-htmlcov/
 .nyc_output/
 
-# Keys (dev only - never commit real keys)
-**/keys/*.pem
-!**/keys/.gitkeep
+# Docker / local data (if created beside compose)
+infra/compose/data/

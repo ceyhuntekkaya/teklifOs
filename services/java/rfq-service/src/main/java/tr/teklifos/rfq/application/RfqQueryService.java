@@ -1,13 +1,19 @@
 package tr.teklifos.rfq.application;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tr.teklifos.rfq.api.RfqDetail;
+import tr.teklifos.rfq.domain.ProductMatchCandidateEntity;
 import tr.teklifos.rfq.domain.RfqDocumentEntity;
 import tr.teklifos.rfq.domain.RfqEntity;
+import tr.teklifos.rfq.domain.RfqLineEntity;
+import tr.teklifos.rfq.infrastructure.ProductMatchCandidateRepository;
 import tr.teklifos.rfq.infrastructure.RfqDocumentRepository;
+import tr.teklifos.rfq.infrastructure.RfqLineRepository;
 import tr.teklifos.rfq.infrastructure.RfqRepository;
 import tr.teklifos.shared.tenant.TenantContext;
 
@@ -16,10 +22,18 @@ public class RfqQueryService {
 
     private final RfqRepository rfqRepository;
     private final RfqDocumentRepository documentRepository;
+    private final RfqLineRepository lineRepository;
+    private final ProductMatchCandidateRepository candidateRepository;
 
-    public RfqQueryService(RfqRepository rfqRepository, RfqDocumentRepository documentRepository) {
+    public RfqQueryService(
+            RfqRepository rfqRepository,
+            RfqDocumentRepository documentRepository,
+            RfqLineRepository lineRepository,
+            ProductMatchCandidateRepository candidateRepository) {
         this.rfqRepository = rfqRepository;
         this.documentRepository = documentRepository;
+        this.lineRepository = lineRepository;
+        this.candidateRepository = candidateRepository;
     }
 
     @Transactional(readOnly = true)
@@ -39,7 +53,14 @@ public class RfqQueryService {
     public RfqDetail getDetail(UUID rfqId) {
         RfqEntity rfq = requireRfq(rfqId);
         List<RfqDocumentEntity> docs = documentRepository.findByRfqIdOrderByUploadedAtAsc(rfqId);
-        return RfqDetail.of(rfq, docs);
+        List<RfqLineEntity> lines = lineRepository.findByRfqIdOrderByLineNumberAsc(rfqId);
+        Map<UUID, List<ProductMatchCandidateEntity>> byLine = new HashMap<>();
+        for (RfqLineEntity line : lines) {
+            byLine.put(
+                    line.getId(),
+                    candidateRepository.findByRfqLineIdOrderByRankOrderAsc(line.getId()));
+        }
+        return RfqDetail.of(rfq, docs, lines, byLine);
     }
 
     public RfqEntity requireRfq(UUID rfqId) {

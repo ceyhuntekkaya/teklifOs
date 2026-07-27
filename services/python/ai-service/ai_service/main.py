@@ -4,7 +4,7 @@ from teklifos_shared.logging import configure_logging, get_logger
 from teklifos_shared.middleware import CorrelationIdMiddleware
 from teklifos_shared.settings import ServiceSettings
 
-from ai_service.routers import extract
+from ai_service.routers import extract, match
 
 DEFAULT_PORT = 9004
 
@@ -23,6 +23,7 @@ def create_app(settings: ServiceSettings | None = None) -> FastAPI:
         return {"status": "ok", "service": cfg.service_name}
 
     app.include_router(extract.router)
+    app.include_router(match.router)
     log.info("app_created", port=cfg.port)
     return app
 

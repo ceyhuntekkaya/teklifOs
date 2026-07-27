@@ -26,6 +26,7 @@ public class DocumentProcessingOrchestrator {
     private final ProcessedMessageRepository processedMessageRepository;
     private final RfqStatusBroadcaster broadcaster;
     private final ObjectMapper objectMapper;
+    private final RfqMatchingService matchingService;
 
     public DocumentProcessingOrchestrator(
             RfqRepository rfqRepository,
@@ -33,13 +34,15 @@ public class DocumentProcessingOrchestrator {
             ProcessingJobRepository jobRepository,
             ProcessedMessageRepository processedMessageRepository,
             RfqStatusBroadcaster broadcaster,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            RfqMatchingService matchingService) {
         this.rfqRepository = rfqRepository;
         this.documentRepository = documentRepository;
         this.jobRepository = jobRepository;
         this.processedMessageRepository = processedMessageRepository;
         this.broadcaster = broadcaster;
         this.objectMapper = objectMapper;
+        this.matchingService = matchingService;
     }
 
     @Transactional
@@ -63,8 +66,14 @@ public class DocumentProcessingOrchestrator {
             UUID documentId = UUID.fromString(root.get("documentId").asText());
             String stage = root.get("stage").asText();
             String error = root.hasNonNull("error") ? root.get("error").asText() : null;
-            String preview =
-                    root.has("extractedPreview") ? root.get("extractedPreview").toString() : null;
+            String preview = null;
+            if (root.has("extractedPreview")) {
+                JsonNode prev = root.get("extractedPreview");
+                preview =
+                        prev.isTextual()
+                                ? prev.asText()
+                                : objectMapper.writeValueAsString(prev);
+            }
 
             RfqDocumentEntity doc =
                     documentRepository
@@ -93,6 +102,11 @@ public class DocumentProcessingOrchestrator {
                     rfqRepository
                             .findByTenantIdAndId(tenantId, doc.getRfqId())
                             .orElseThrow();
+            if (target == DocumentProcessingSaga.EXTRACTED && error == null) {
+                matchingService.onDocumentExtracted(tenantId, rfq.getId(), doc);
+                doc = documentRepository.findByTenantIdAndId(tenantId, documentId).orElse(doc);
+                rfq = rfqRepository.findByTenantIdAndId(tenantId, doc.getRfqId()).orElseThrow();
+            }
             maybeAdvanceRfq(rfq);
             broadcaster.broadcast(tenantId, rfq.getId(), doc.getProcessingState());
 
@@ -119,21 +133,21 @@ public class DocumentProcessingOrchestrator {
 
     private void maybeAdvanceRfq(RfqEntity rfq) {
         List<RfqDocumentEntity> docs = documentRepository.findByRfqIdOrderByUploadedAtAsc(rfq.getId());
-        boolean allExtracted =
+        boolean allMatched =
                 !docs.isEmpty()
                         && docs.stream()
                                 .allMatch(
                                         d ->
-                                                DocumentProcessingSaga.EXTRACTED
+                                                DocumentProcessingSaga.MATCHED
                                                                 .name()
                                                                 .equals(d.getProcessingState())
                                                         || DocumentProcessingSaga.READY_FOR_REVIEW
                                                                 .name()
                                                                 .equals(d.getProcessingState()));
-        if (allExtracted) {
+        if (allMatched) {
             docs.forEach(
                     d -> {
-                        if (DocumentProcessingSaga.EXTRACTED.name().equals(d.getProcessingState())) {
+                        if (DocumentProcessingSaga.MATCHED.name().equals(d.getProcessingState())) {
                             d.setProcessingState(DocumentProcessingSaga.READY_FOR_REVIEW.name());
                             documentRepository.save(d);
                         }
